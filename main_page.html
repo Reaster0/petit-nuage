@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petit Nuage</title>
+</head>
+<body>
+	<h1 class="topScreen title">Petit Nuage</h1>
+	<button class="btn rain" id="rain-btn">
+        <span>🌧️</span>
+    </button>
+	<button class="btn orage" id="orage-btn">
+		<span>🌩️</span>
+	</button>
+	<button class="btn" id="led-btn">
+		<span>💡</span>
+	</button>
+
+	<div class="bottom">made with ❤️ by Reaster</div>
+	
+</body>
+
+<script>
+	const btnRain = document.querySelector('#rain-btn');
+	const btnOrage = document.querySelector('#orage-btn');
+	const btnLed = document.querySelector('#led-btn');
+
+	async function syncButtons() {
+		fetch('http://192.168.1.1/status')
+			.then(response => response.json())
+			.then(data => {
+				console.log(data);
+				if (data.rain == false){
+					btnRain.classList.remove('active');
+				}
+				else{
+					btnRain.classList.add('active');
+				}
+
+				if (data.orage == false){
+					btnOrage.classList.remove('active');
+				}
+				else{
+					btnOrage.classList.add('active');
+				}
+
+				if (data.led == false){
+					btnLed.classList.remove('active');
+				}
+				else{
+					btnLed.classList.add('active');
+				}
+			});
+	}
+	
+	btnRain.addEventListener('click', async () => {
+	  await fetch('http://192.168.1.1/toggle/rain');
+	  syncButtons();
+	});
+
+	btnOrage.addEventListener('click', async () => {
+	  await fetch('http://192.168.1.1/toggle/orage');
+	  syncButtons();
+	});
+
+	btnLed.addEventListener('click', async () => {
+	  await fetch('http://192.168.1.1/toggle/led');
+	  syncButtons();
+	});
+
+	syncButtons();
+
+</script>
+
+<style lang="scss">
+	body {
+		margin: 0; /* Remove default margin */
+		font-family: 'Arial', sans-serif;
+		text-align: center;
+		height: 100vh; /* Make the background cover the entire viewport height */
+		background: linear-gradient(to bottom, #00214A, #EA25B5);
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+	
+	h1 {
+		color: white;
+		
+		text-transform: uppercase;
+		font-family: 'Montserrat';
+		font-weight: 200;
+		z-index: 2;
+	}
+
+	.topScreen {
+		position: absolute;
+		top: 20px;
+	}
+
+	.title {
+  font-size: 3em;
+  background: linear-gradient(to right, #0D3F7C, #EA25B5);
+  -webkit-background-clip: text;
+  color: transparent;
+  font-family: 'Arial', sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+.btn {
+  width: 180px;
+  height: 60px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid #ffffff;
+  outline: none;
+  transition: 1s ease-in-out;
+  margin: 20px;
+}
+
+.btn.active {
+	transition: 1s ease-in-out;
+  	background: #FF82F4;
+}
+
+.rain {
+	border: 1px solid #91C9FF;
+}
+
+.orage {
+	border: 1px solid #EA25B5;
+}
+
+.rain.active {
+  transition: 1s ease-in-out;
+  background: #04BBEC;
+}
+
+.orage.active {
+	transition: 1s ease-in-out;
+  	background: #0D3F7C;
+}
+
+.btn.active svg {
+  stroke-dashoffset: -480;
+}
+
+.btn span {
+  color: white;
+  font-size: 18px;
+  font-weight: 100;
+}
+
+.bottom {
+	position: absolute;
+	bottom: 20px;
+	background: linear-gradient(to right, #0D3F7C, #FF82F4);
+  -webkit-background-clip: text;
+  color: transparent;
+  font-family: 'Arial', sans-serif;
+}
+
+</style>
+</html>
