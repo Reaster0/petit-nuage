@@ -7,26 +7,40 @@ const char *index_html = "<!DOCTYPE html>\
 </head>\
 <body>\
 	<h1 class=\"topScreen title\">Petit Nuage</h1>\
+	<h1 class=\"connected\" style=\"display: none;\">Connected</h1>\
+	<h1 class=\"disconnect\" style=\"display: none;\">Disconnected</h1>\
 	<button class=\"btn rain\" id=\"rain-btn\">\
         <span>🌧️</span>\
     </button>\
-	<button class=\"btn orage\" id=\"orage-btn\">\
-		<span>🌩️</span>\
-	</button>\
-	<button class=\"btn\" id=\"led-btn\">\
-		<span>💡</span>\
-	</button>\
-\
 	<div class=\"bottom\">made with ❤️ by Reaster</div>\
 	\
 </body>\
 \
 <script>\
 	const btnRain = document.querySelector('#rain-btn');\
-	const btnOrage = document.querySelector('#orage-btn');\
-	const btnLed = document.querySelector('#led-btn');\
+	\
+	/* every half seconds, check if the server is connected by fetching the server and set the right class visible, if the fetch didn't succeded in 1s, the server is disconnected */\
+	async function healthCheck() {\
+		setInterval(() => {\
+			try {\
+				fetch('http://192.168.1.1/health')\
+				.then(response => {\
+					document.querySelector('.connected').style.display = 'block';\
+					document.querySelector('.disconnect').style.display = 'none';\
+				})\
+				.catch(error => {\
+					document.querySelector('.connected').style.display = 'none';\
+					document.querySelector('.disconnect').style.display = 'block';\
+				});\
+			} catch (error) {\
+				document.querySelector('.connected').style.display = 'none';\
+				document.querySelector('.disconnect').style.display = 'block';\
+			}\
+		}, 500);\
+	}\
 \
 	async function syncButtons() {\
+		btnRain.classList.toggle('active');\
 		fetch('http://192.168.1.1/status')\
 			.then(response => response.json())\
 			.then(data => {\
@@ -37,39 +51,17 @@ const char *index_html = "<!DOCTYPE html>\
 				else{\
 					btnRain.classList.add('active');\
 				}\
-\
-				if (data.orage == false){\
-					btnOrage.classList.remove('active');\
-				}\
-				else{\
-					btnOrage.classList.add('active');\
-				}\
-\
-				if (data.led == false){\
-					btnLed.classList.remove('active');\
-				}\
-				else{\
-					btnLed.classList.add('active');\
-				}\
 			});\
 	}\
 	\
 	btnRain.addEventListener('click', async () => {\
-	  await fetch('http://192.168.1.1/toggle/rain');\
-	  syncButtons();\
-	});\
-\
-	btnOrage.addEventListener('click', async () => {\
-	  await fetch('http://192.168.1.1/toggle/orage');\
-	  syncButtons();\
-	});\
-\
-	btnLed.addEventListener('click', async () => {\
-	  await fetch('http://192.168.1.1/toggle/led');\
-	  syncButtons();\
+		await fetch('http://192.168.1.1/toggle/rain');\
+		syncButtons();\
 	});\
 \
 	syncButtons();\
+	healthCheck();\
+\
 \
 </script>\
 \
@@ -103,7 +95,7 @@ const char *index_html = "<!DOCTYPE html>\
 	.title {\
   font-size: 3em;\
   background: linear-gradient(to right, #0D3F7C, #EA25B5);\
-  -webkit-background-clip: text;\
+  background-clip: text;\
   color: transparent;\
   font-family: 'Arial', sans-serif;\
   text-align: center;\
@@ -112,14 +104,15 @@ const char *index_html = "<!DOCTYPE html>\
 }\
 \
 .btn {\
-  width: 180px;\
-  height: 60px;\
-  cursor: pointer;\
-  background: transparent;\
-  border: 1px solid #ffffff;\
-  outline: none;\
-  transition: 1s ease-in-out;\
-  margin: 20px;\
+	width: 160px;\
+	height: 160px;\
+	cursor: pointer;\
+	background: transparent;\
+	border: 1px solid #ffffff;\
+	outline: none;\
+	transition: 1s ease-in-out;\
+	margin: 20px;\
+	border-radius: 50%; /* Make the button round */\
 }\
 \
 .btn.active {\
@@ -131,18 +124,9 @@ const char *index_html = "<!DOCTYPE html>\
 	border: 1px solid #91C9FF;\
 }\
 \
-.orage {\
-	border: 1px solid #EA25B5;\
-}\
-\
 .rain.active {\
   transition: 1s ease-in-out;\
   background: #04BBEC;\
-}\
-\
-.orage.active {\
-	transition: 1s ease-in-out;\
-  	background: #0D3F7C;\
 }\
 \
 .btn.active svg {\
@@ -151,17 +135,37 @@ const char *index_html = "<!DOCTYPE html>\
 \
 .btn span {\
   color: white;\
-  font-size: 18px;\
+  font-size: 50px;\
   font-weight: 100;\
 }\
 \
 .bottom {\
-	position: absolute;\
-	bottom: 20px;\
-	background: linear-gradient(to right, #0D3F7C, #FF82F4);\
-  -webkit-background-clip: text;\
+  position: absolute;\
+  bottom: 20px;\
+  background: linear-gradient(to right, #0D3F7C, #FF82F4);\
+  background-clip: text;\
   color: transparent;\
   font-family: 'Arial', sans-serif;\
+}\
+\
+.connected{\
+  position: relative;\
+  color: #03A062;\
+  font-weight: 700;\
+  font-size: 20px;\
+  padding-bottom: 40%;\
+  letter-spacing: 5px;\
+  text-transform: uppercase;\
+}\
+\
+.disconnect{\
+  position: relative;\
+  color: #FF0000;\
+  font-weight: 700;\
+  font-size: 20px;\
+  padding-bottom: 40%;\
+  letter-spacing: 5px;\
+  text-transform: uppercase;\
 }\
 \
 </style>\
