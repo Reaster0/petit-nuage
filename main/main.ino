@@ -7,10 +7,10 @@
 const char* ssid = "Petit Nuage☁️";  // Enter SSID here
 const char* password = "12345678";  //Enter Password here
 
-#define RAIN_PIN 14
+#define RAIN_PIN 0
 #define LED_PIN 2
 
-bool rainStatus = LOW;
+bool rainStatus = HIGH;
 
 /* Put IP Address details */
 IPAddress local_ip(192,168,1,1);
@@ -25,6 +25,7 @@ void setup() {
 	pinMode(LED_PIN, OUTPUT);
 
 	digitalWrite(LED_PIN, LOW);
+	digitalWrite(RAIN_PIN, rainStatus);
 
 	WiFi.softAP(ssid, password);
 	WiFi.softAPConfig(local_ip, gateway, subnet);
@@ -57,7 +58,7 @@ void handle_OnConnect() {
 void handle_status() {
 	// Serial.println("Get client request for status");
 	StaticJsonDocument<200> doc;
-  	doc["rain"] = rainStatus;
+  	doc["rain"] = !rainStatus;
   	String output;
   	serializeJson(doc, output);
   	server.send(200, "application/json", output);
